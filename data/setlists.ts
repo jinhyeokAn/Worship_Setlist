@@ -37,7 +37,7 @@ export const setlists: Setlist[] = [
     verse: {
       reference: "시편 51:10",
       text: "하나님이여 내 속에 정한 마음을 창조하시고\n내 안에 정직한 영을 새롭게 하소서",
-      link: "https://www.bskorea.or.kr/bible/korbibReadpage.php?version=GAE&txtReadInfo=%EC%8B%9C%2051:10&rdoReadType=2&cVersion=&fontSize=15px",
+      link: "https://www.bskorea.or.kr/bible/korbibReadpage.php?version=GAE&txtReadInfo=%EC%8B%9C%2051:1&rdoReadType=2&cVersion=&fontSize=15px",
     },
     songs: [
       {
