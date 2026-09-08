@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { setlists } from "@/data/setlists";
 import SetlistPlayer from "@/components/SetlistPlayer";
-import StaffLines from "@/components/StaffLines";
 
 export default async function SetlistPage({
   params,
@@ -21,10 +20,7 @@ export default async function SetlistPage({
       >
         ← 전체 콘티
       </Link>
-      <div className="mt-3">
-        <StaffLines />
-      </div>
-      <h1 className="font-display mt-2 text-2xl font-bold tracking-tight">
+      <h1 className="font-display mt-4 text-2xl font-bold tracking-tight">
         {setlist.title}
       </h1>
       <p className="text-sm text-[var(--parchment-dim)]">
@@ -33,7 +29,7 @@ export default async function SetlistPage({
 
       {setlist.verse && (
         <blockquote className="mt-4 border-l border-[var(--accent-soft)] bg-[var(--accent)]/5 p-4 pl-6">
-          <p className="font-hand whitespace-pre-line text-xl leading-loose text-[var(--foreground)]">
+          <p className="font-display whitespace-pre-line text-base leading-loose text-[var(--foreground)]">
             {setlist.verse.text}
           </p>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
