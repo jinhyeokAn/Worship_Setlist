@@ -4,8 +4,8 @@ import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "청년부 콘티 모음",
-  description: "청년부 찬양 콘티 유튜브 링크를 한 번에 모아보는 사이트",
+  title: "다니엘 커뮤니티 콘티 모음",
+  description: "다니엘 커뮤니티 찬양 콘티 유튜브 링크를 한 번에 모아보는 사이트",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

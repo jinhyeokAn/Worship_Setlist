@@ -21,7 +21,7 @@ export default function SiteHeader() {
           </span>
           <span className="flex flex-col leading-tight">
             <span className="font-display text-base font-bold tracking-tight">
-              청년부 콘티
+              다니엘 커뮤니티
             </span>
             <span className="font-signature text-base text-[var(--parchment-faint)]">
               J. J.
