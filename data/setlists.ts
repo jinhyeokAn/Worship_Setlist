@@ -32,6 +32,10 @@ export const setlists: Setlist[] = [
     id: "2026-09-13",
     title: "9월 13일 예배",
     date: "2026-09-13",
+    verse: {
+      reference: "시편 51:10",
+      text: "하나님이여 내 속에 정한 마음을 창조하시고\n내 안에 정직한 영을 새롭게 하소서",
+    },
     songs: [
       {
         title: "말씀이 내 능력되어",
