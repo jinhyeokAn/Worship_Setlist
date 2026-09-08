@@ -17,6 +17,7 @@ export const setlists: Setlist[] = [
     verse: {                    // 이번 예배 말씀 (선택, 없으면 통째로 생략 가능)
       reference: "요한복음 3:16",
       text: "하나님이 세상을 이처럼 사랑하사 독생자를 주셨으니...",
+      link: "https://www.bskorea.or.kr/bible/korbibReadpage.php?version=GAE&txtReadInfo=...", // 전체 본문 링크 (선택)
     },
     songs: [
       { title: "은혜", url: "https://www.youtube.com/watch?v=xxxxxxxxxxx" },
@@ -27,6 +28,8 @@ export const setlists: Setlist[] = [
 ```
 
 - `id`는 다른 콘티와 겹치지 않게만 정하면 됩니다 (날짜를 그대로 써도 됨).
+- `verse.link`은 자동 생성되지 않습니다 — [대한성서공회](https://www.bskorea.or.kr/bible/korbibReadpage.php)에서
+  해당 본문을 직접 찾은 뒤 주소창 URL을 그대로 복사해 넣으면 됩니다.
 - `url`은 일반 유튜브 링크(`watch?v=`), 단축 링크(`youtu.be/`), Shorts 링크 모두 지원합니다.
 - 곡은 배열 순서대로 콘티 화면에 표시/재생됩니다.
 

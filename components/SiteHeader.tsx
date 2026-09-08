@@ -23,7 +23,7 @@ export default function SiteHeader() {
             <span className="font-display text-base font-bold tracking-tight">
               청년부 콘티
             </span>
-            <span className="font-accent text-xs italic tracking-[0.2em] text-[var(--parchment-faint)]">
+            <span className="font-signature text-base text-[var(--parchment-faint)]">
               J. J.
             </span>
           </span>

@@ -10,6 +10,8 @@ export type Verse = {
   reference: string;
   /** 본문 내용 */
   text: string;
+  /** 전체 본문을 볼 수 있는 외부 링크 (선택, 예: 대한성서공회 본문보기) */
+  link?: string;
 };
 
 export type Setlist = {
@@ -35,6 +37,7 @@ export const setlists: Setlist[] = [
     verse: {
       reference: "시편 51:10",
       text: "하나님이여 내 속에 정한 마음을 창조하시고\n내 안에 정직한 영을 새롭게 하소서",
+      link: "https://www.bskorea.or.kr/bible/korbibReadpage.php?version=GAE&txtReadInfo=%EC%8B%9C%2051:10&rdoReadType=2&cVersion=&fontSize=15px",
     },
     songs: [
       {

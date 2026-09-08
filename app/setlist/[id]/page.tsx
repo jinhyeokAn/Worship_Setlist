@@ -36,9 +36,21 @@ export default async function SetlistPage({
           <p className="font-hand whitespace-pre-line text-xl leading-loose text-[var(--foreground)]">
             {setlist.verse.text}
           </p>
-          <cite className="font-accent mt-3 block text-sm italic tracking-wide text-[var(--parchment-dim)]">
-            — {setlist.verse.reference}
-          </cite>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <cite className="font-accent text-sm italic tracking-wide text-[var(--parchment-dim)]">
+              — {setlist.verse.reference}
+            </cite>
+            {setlist.verse.link && (
+              <a
+                href={setlist.verse.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-accent shrink-0 border border-[var(--accent-soft)] px-3 py-1 text-xs italic text-[var(--accent)] transition hover:bg-[var(--accent)]/10"
+              >
+                전체 본문 보기 ↗
+              </a>
+            )}
+          </div>
         </blockquote>
       )}
 
