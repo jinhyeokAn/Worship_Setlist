@@ -8,7 +8,7 @@
   --ink-soft: #1d1710;
   --ink-raised: #241c12;
   --parchment-dim: #a89878;
-  --parchment-faint: #6f6248;
+  --parchment-faint: #96865f;
   --rule: #382d1c;
 }
 
@@ -25,6 +25,7 @@
   --font-sans: "IBM Plex Sans KR", "Malgun Gothic", sans-serif;
   --font-display: "Gowun Batang", "Nanum Myeongjo", serif;
   --font-accent: "EB Garamond", Georgia, serif;
+  --font-hand: "Nanum Brush Script", "Gowun Batang", cursive;
 }
 
 body {

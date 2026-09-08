@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { setlists } from "@/data/setlists";
 import SetlistPlayer from "@/components/SetlistPlayer";
+import StaffLines from "@/components/StaffLines";
 
 export default async function SetlistPage({
   params,
@@ -12,10 +13,6 @@ export default async function SetlistPage({
   const setlist = setlists.find((s) => s.id === id);
   if (!setlist) notFound();
 
-  const verseText = setlist.verse?.text.trim() ?? "";
-  const dropcap = verseText.charAt(0);
-  const verseRest = verseText.slice(1);
-
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
       <Link
@@ -24,6 +21,9 @@ export default async function SetlistPage({
       >
         ← 전체 콘티
       </Link>
+      <div className="mt-3">
+        <StaffLines />
+      </div>
       <h1 className="font-display mt-2 text-2xl font-bold tracking-tight">
         {setlist.title}
       </h1>
@@ -32,15 +32,12 @@ export default async function SetlistPage({
       </p>
 
       {setlist.verse && (
-        <blockquote className="relative mt-4 border-l border-[var(--accent-soft)] bg-[var(--accent)]/5 p-4 pl-14">
-          <span className="font-display absolute left-3 top-2 text-4xl font-bold leading-none text-[var(--accent)]">
-            {dropcap}
-          </span>
-          <p className="font-display whitespace-pre-line text-sm leading-relaxed text-[var(--foreground)]">
-            {verseRest}
+        <blockquote className="mt-4 border-l border-[var(--accent-soft)] bg-[var(--accent)]/5 p-4 pl-6">
+          <p className="font-hand whitespace-pre-line text-xl leading-loose text-[var(--foreground)]">
+            {setlist.verse.text}
           </p>
-          <cite className="font-accent mt-2 block text-xs italic text-[var(--parchment-faint)]">
-            {setlist.verse.reference}
+          <cite className="font-accent mt-3 block text-sm italic tracking-wide text-[var(--parchment-dim)]">
+            — {setlist.verse.reference}
           </cite>
         </blockquote>
       )}

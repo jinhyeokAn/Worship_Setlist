@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { setlists } from "@/data/setlists";
 import { getYoutubeThumbnail, getYoutubeVideoId } from "@/lib/youtube";
+import StaffLines from "@/components/StaffLines";
 
 const DECKLE_EDGE =
   "polygon(0% 2%,4% 0%,10% 2.5%,16% 0%,22% 2%,28% 0%,34% 2.5%,40% 0%,46% 2%,52% 0%,58% 2.5%,64% 0%,70% 2%,76% 0%,82% 2.5%,88% 0%,94% 2%,100% 0%,100% 98%,96% 100%,90% 97.5%,84% 100%,78% 98%,72% 100%,66% 97.5%,60% 100%,54% 98%,48% 100%,42% 97.5%,36% 100%,30% 98%,24% 100%,18% 97.5%,12% 100%,6% 98%,0% 100%)";
@@ -35,7 +36,8 @@ export default function Home() {
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
       <header className="mb-8">
-        <h1 className="font-display text-2xl font-bold tracking-tight">
+        <StaffLines />
+        <h1 className="font-display mt-3 text-2xl font-bold tracking-tight">
           찬양 콘티 라이브러리
         </h1>
         <p className="mt-1 text-sm text-[var(--parchment-dim)]">
@@ -100,7 +102,7 @@ export default function Home() {
                       key={s.id}
                       href={`/setlist/${s.id}`}
                       style={{ clipPath: DECKLE_EDGE, animationDelay: `${i * 90}ms` }}
-                      className="group relative aspect-square w-40 shrink-0 overflow-hidden bg-[var(--ink-soft)] opacity-0 [animation:ink-in_0.55s_ease_forwards]"
+                      className="group relative aspect-square w-40 shrink-0 overflow-hidden bg-[var(--ink-soft)] opacity-0 [animation:ink-in_0.55s_ease_forwards] [background-image:repeating-linear-gradient(to_bottom,rgba(236,226,206,0.05)_0_1px,transparent_1px_17px)]"
                     >
                       {cover && (
                         // eslint-disable-next-line @next/next/no-img-element
