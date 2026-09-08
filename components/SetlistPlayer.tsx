@@ -193,7 +193,7 @@ export default function SetlistPlayer({ setlist }: { setlist: Setlist }) {
 
   if (songs.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-white/15 p-6 text-center text-sm text-zinc-400">
+      <p className="border border-dashed border-[var(--rule)] p-6 text-center text-sm text-[var(--parchment-dim)]">
         이 콘티에는 아직 곡이 없습니다.
       </p>
     );
@@ -205,11 +205,15 @@ export default function SetlistPlayer({ setlist }: { setlist: Setlist }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="aspect-video w-full overflow-hidden rounded-2xl border border-white/10 bg-black">
+      <div className="relative aspect-video w-full overflow-hidden border border-[var(--rule)] bg-[var(--ink-soft)] [background-image:radial-gradient(circle_at_50%_42%,rgba(224,152,63,0.09),transparent_62%)]">
+        <span className="pointer-events-none absolute left-2 top-2 h-3.5 w-3.5 border-l border-t border-[var(--accent-soft)]" />
+        <span className="pointer-events-none absolute right-2 top-2 h-3.5 w-3.5 border-r border-t border-[var(--accent-soft)]" />
+        <span className="pointer-events-none absolute bottom-2 left-2 h-3.5 w-3.5 border-b border-l border-[var(--accent-soft)]" />
+        <span className="pointer-events-none absolute bottom-2 right-2 h-3.5 w-3.5 border-b border-r border-[var(--accent-soft)]" />
         {currentId ? (
           <div ref={mountRef} className="h-full w-full" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-zinc-400">
+          <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-[var(--parchment-dim)]">
             링크를 확인해주세요: {songs[current]?.url}
           </div>
         )}
@@ -226,7 +230,7 @@ export default function SetlistPlayer({ setlist }: { setlist: Setlist }) {
           type="button"
           onClick={togglePlay}
           aria-label={isPlaying ? "일시정지" : "재생"}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-black transition hover:brightness-110"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--background)] transition hover:brightness-110 active:scale-95"
         >
           {isPlaying ? <PauseIcon /> : <PlayIcon />}
         </button>
@@ -264,15 +268,15 @@ export default function SetlistPlayer({ setlist }: { setlist: Setlist }) {
               <button
                 type="button"
                 onClick={() => setCurrent(i)}
-                className={`flex w-full items-center gap-3 rounded-lg p-2 text-left transition ${
+                className={`flex w-full items-center gap-3 p-2 text-left transition ${
                   isCurrent
-                    ? "bg-white/10"
-                    : "hover:bg-white/5"
+                    ? "bg-[var(--accent)]/10"
+                    : "hover:bg-[var(--accent)]/5"
                 }`}
               >
                 <span
-                  className={`w-5 shrink-0 text-center text-xs font-bold ${
-                    isCurrent ? "text-[var(--accent)]" : "text-zinc-500"
+                  className={`font-accent w-5 shrink-0 text-center text-xs italic ${
+                    isCurrent ? "text-[var(--accent)]" : "text-[var(--parchment-faint)]"
                   }`}
                 >
                   {isCurrent && isPlaying ? <EqualizerIcon /> : i + 1}
@@ -282,15 +286,15 @@ export default function SetlistPlayer({ setlist }: { setlist: Setlist }) {
                   <img
                     src={getYoutubeThumbnail(id)}
                     alt=""
-                    className="h-10 w-16 shrink-0 rounded object-cover"
+                    className="h-10 w-16 shrink-0 object-cover [filter:sepia(0.35)_contrast(1.05)_brightness(0.85)]"
                   />
                 ) : (
-                  <span className="flex h-10 w-16 shrink-0 items-center justify-center rounded bg-white/10 text-[10px] text-zinc-400">
+                  <span className="flex h-10 w-16 shrink-0 items-center justify-center border border-[var(--rule)] text-[10px] text-[var(--parchment-dim)]">
                     링크 오류
                   </span>
                 )}
                 <span
-                  className={`truncate text-sm font-medium ${
+                  className={`font-display truncate text-sm font-semibold ${
                     isCurrent ? "text-[var(--accent)]" : ""
                   }`}
                 >
@@ -326,7 +330,7 @@ function IconButton({
       aria-label={label}
       aria-pressed={active}
       className={`flex h-9 w-9 items-center justify-center rounded-full transition disabled:opacity-30 ${
-        active ? "text-[var(--accent)]" : "text-zinc-300 hover:text-white"
+        active ? "text-[var(--accent)]" : "text-[var(--parchment-dim)] hover:text-[var(--foreground)]"
       }`}
     >
       {children}
@@ -386,7 +390,7 @@ function RepeatOneIcon() {
 }
 function VolumeIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" className="shrink-0 text-zinc-400">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" className="shrink-0 text-[var(--parchment-faint)]">
       <path d="M4 9v6h4l5 5V4L8 9H4zM16.5 12a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z" />
     </svg>
   );

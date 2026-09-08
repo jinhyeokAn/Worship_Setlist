@@ -1,20 +1,81 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #f4f4f5;
-  --accent: #a855f7;
+  --background: #15100a;
+  --foreground: #ece2ce;
+  --accent: #e0983f;
+  --accent-soft: #c98432;
+  --ink-soft: #1d1710;
+  --ink-raised: #241c12;
+  --parchment-dim: #a89878;
+  --parchment-faint: #6f6248;
+  --rule: #382d1c;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-accent-soft: var(--accent-soft);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-raised: var(--ink-raised);
+  --color-parchment-dim: var(--parchment-dim);
+  --color-parchment-faint: var(--parchment-faint);
+  --color-rule: var(--rule);
+  --font-sans: "IBM Plex Sans KR", "Malgun Gothic", sans-serif;
+  --font-display: "Gowun Batang", "Nanum Myeongjo", serif;
+  --font-accent: "EB Garamond", Georgia, serif;
 }
 
 body {
-  background: var(--background);
+  position: relative;
+  background:
+    radial-gradient(ellipse 820px 520px at 50% -8%, rgba(224, 152, 63, 0.1), transparent 62%),
+    var(--background);
   color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Faint film-grain overlay for the manuscript/candlelight mood. Kept at very
+   low opacity so it never competes with text legibility. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scaleY(1) rotate(0deg);
+  }
+  42% {
+    opacity: 0.86;
+    transform: scaleY(0.93) rotate(-1deg);
+  }
+  61% {
+    opacity: 1;
+    transform: scaleY(1.04) rotate(1deg);
+  }
+  80% {
+    opacity: 0.92;
+    transform: scaleY(0.98) rotate(0deg);
+  }
+}
+
+@keyframes ink-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

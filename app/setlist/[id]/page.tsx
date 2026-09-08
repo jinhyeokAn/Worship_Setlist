@@ -12,24 +12,34 @@ export default async function SetlistPage({
   const setlist = setlists.find((s) => s.id === id);
   if (!setlist) notFound();
 
+  const verseText = setlist.verse?.text.trim() ?? "";
+  const dropcap = verseText.charAt(0);
+  const verseRest = verseText.slice(1);
+
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
+      <Link
+        href="/"
+        className="text-sm text-[var(--parchment-dim)] hover:text-[var(--foreground)]"
+      >
         ← 전체 콘티
       </Link>
-      <h1 className="mt-2 text-2xl font-extrabold tracking-tight">
+      <h1 className="font-display mt-2 text-2xl font-bold tracking-tight">
         {setlist.title}
       </h1>
-      <p className="text-sm text-zinc-400">
+      <p className="text-sm text-[var(--parchment-dim)]">
         {setlist.date} · {setlist.songs.length}곡
       </p>
 
       {setlist.verse && (
-        <blockquote className="mt-4 rounded-lg border-l-4 border-[var(--accent)] bg-white/5 p-4">
-          <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-200">
-            {setlist.verse.text}
+        <blockquote className="relative mt-4 border-l border-[var(--accent-soft)] bg-[var(--accent)]/5 p-4 pl-14">
+          <span className="font-display absolute left-3 top-2 text-4xl font-bold leading-none text-[var(--accent)]">
+            {dropcap}
+          </span>
+          <p className="font-display whitespace-pre-line text-sm leading-relaxed text-[var(--foreground)]">
+            {verseRest}
           </p>
-          <cite className="mt-2 block text-xs not-italic text-zinc-500">
+          <cite className="font-accent mt-2 block text-xs italic text-[var(--parchment-faint)]">
             {setlist.verse.reference}
           </cite>
         </blockquote>

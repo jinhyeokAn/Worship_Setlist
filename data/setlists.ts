@@ -27,4 +27,24 @@ export type Setlist = {
 
 // 새 콘티를 추가하려면 이 배열에 객체를 하나 더 넣고 git push 하면 됩니다.
 // 자세한 방법은 README.md 참고.
-export const setlists: Setlist[] = [];
+export const setlists: Setlist[] = [
+  {
+    id: "2026-09-13",
+    title: "9월 13일 예배",
+    date: "2026-09-13",
+    songs: [
+      {
+        title: "말씀이 내 능력되어",
+        url: "https://www.youtube.com/watch?v=MkDMVdFlTCQ&list=RDMkDMVdFlTCQ&start_radio=1",
+      },
+      {
+        title: "성령이여 내 영혼을 / 불을 내려주소서",
+        url: "https://youtu.be/oLZ_c4PHS6w?si=4cvjD2p1MZoND00b",
+      },
+      {
+        title: "영광에서 영광으로",
+        url: "https://youtu.be/q_h5fZP_JzU?si=5yk10UlYmasz6q1G",
+      },
+    ],
+  },
+];
