@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { submitSetlist, verifyAdmin } from "./actions";
+import { deleteSetlist, listSetlists, submitSetlist, updateSetlist, verifyAdmin } from "./actions";
 import type { Setlist } from "@/data/setlists";
 
 type SongDraft = { title: string; url: string };
@@ -53,6 +53,11 @@ function titleFromParts(month: number, day: number): string {
   return `${month}월 ${day}일 예배`;
 }
 
+function parseDateParts(dateStr: string): { year: number; month: number; day: number } {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return { year, month, day };
+}
+
 export default function AdminPage() {
   const [adminId, setAdminId] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -67,8 +72,14 @@ export default function AdminPage() {
   const [songs, setSongs] = useState<SongDraft[]>([emptySong()]);
   const [bulkText, setBulkText] = useState("");
   const [status, setStatus] = useState<
-    { type: "idle" } | { type: "submitting" } | { type: "error"; message: string } | { type: "success" }
+    | { type: "idle" }
+    | { type: "submitting" }
+    | { type: "error"; message: string }
+    | { type: "success"; wasEditing: boolean }
   >({ type: "idle" });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [existingSetlists, setExistingSetlists] = useState<Setlist[] | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
 
   const date = `${year}-${pad(month)}-${pad(day)}`;
   const currentYear = new Date().getFullYear();
@@ -97,8 +108,46 @@ export default function AdminPage() {
     if (result.ok) {
       setIsAuthed(true);
       setLoginStatus({ type: "idle" });
+      refreshList();
     } else {
       setLoginStatus({ type: "error", message: result.error });
+    }
+  }
+
+  async function refreshList() {
+    const result = await listSetlists(adminId, adminPassword);
+    if (result.ok) {
+      setExistingSetlists([...result.setlists].sort((a, b) => b.date.localeCompare(a.date)));
+      setListError(null);
+    } else {
+      setListError(result.error);
+    }
+  }
+
+  function startEdit(setlist: Setlist) {
+    setEditingId(setlist.id);
+    setServiceDate(parseDateParts(setlist.date));
+    setVerseReference(setlist.verse?.reference ?? "");
+    setVerseText(setlist.verse?.text ?? "");
+    setVerseLink(setlist.verse?.link ?? "");
+    setSongs(setlist.songs.map((s) => ({ title: s.title, url: s.url })));
+    setStatus({ type: "idle" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    resetForm();
+  }
+
+  async function handleDelete(setlist: Setlist) {
+    if (!window.confirm(`"${setlist.title}"을(를) 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    const result = await deleteSetlist({ adminId, adminPassword, id: setlist.id });
+    if (result.ok) {
+      if (editingId === setlist.id) cancelEdit();
+      refreshList();
+    } else {
+      setListError(result.error);
     }
   }
 
@@ -125,6 +174,7 @@ export default function AdminPage() {
   }
 
   function resetForm() {
+    setEditingId(null);
     setServiceDate(defaultServiceDate());
     setVerseReference("");
     setVerseText("");
@@ -153,10 +203,15 @@ export default function AdminPage() {
         : {}),
     };
 
-    const result = await submitSetlist({ adminId, adminPassword, setlist });
+    const wasEditing = editingId !== null;
+    const result = editingId
+      ? await updateSetlist({ adminId, adminPassword, originalId: editingId, setlist })
+      : await submitSetlist({ adminId, adminPassword, setlist });
+
     if (result.ok) {
-      setStatus({ type: "success" });
+      setStatus({ type: "success", wasEditing });
       resetForm();
+      refreshList();
     } else {
       setStatus({ type: "error", message: result.error });
     }
@@ -208,10 +263,62 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <h1 className="font-display text-2xl font-bold tracking-tight">관리자 · 콘티 등록</h1>
+      <h1 className="font-display text-2xl font-bold tracking-tight">
+        관리자 · 콘티 {editingId ? "수정" : "등록"}
+      </h1>
       <p className="mt-1 text-sm text-[var(--parchment-dim)]">
-        등록하면 GitHub에 바로 커밋되고, 잠시 후 사이트에 반영됩니다.
+        등록/수정/삭제하면 GitHub에 바로 커밋되고, 잠시 후 사이트에 반영됩니다.
       </p>
+
+      <section className="mt-6 flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--parchment-dim)]">
+            등록된 콘티
+          </h2>
+          <button
+            type="button"
+            onClick={refreshList}
+            className="text-xs text-[var(--parchment-faint)] hover:text-[var(--foreground)]"
+          >
+            새로고침
+          </button>
+        </div>
+        {listError && (
+          <p className="border border-dashed border-[var(--rule)] p-3 text-sm text-[var(--accent)]">
+            {listError}
+          </p>
+        )}
+        {existingSetlists === null && !listError && (
+          <p className="text-sm text-[var(--parchment-faint)]">불러오는 중...</p>
+        )}
+        {existingSetlists?.length === 0 && (
+          <p className="text-sm text-[var(--parchment-faint)]">등록된 콘티가 없습니다.</p>
+        )}
+        {existingSetlists?.map((s) => (
+          <div
+            key={s.id}
+            className="flex items-center gap-3 border-b border-[var(--rule)] py-2"
+          >
+            <span className="min-w-0 flex-1 truncate text-sm">
+              {s.title} <span className="text-[var(--parchment-faint)]">· {s.date}</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => startEdit(s)}
+              className="shrink-0 border border-[var(--accent-soft)] px-2 py-1 text-xs text-[var(--accent)] transition hover:bg-[var(--accent)]/10"
+            >
+              수정
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDelete(s)}
+              className="shrink-0 px-2 py-1 text-xs text-[var(--parchment-faint)] hover:text-[var(--accent)]"
+            >
+              삭제
+            </button>
+          </div>
+        ))}
+      </section>
 
       <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-6">
         <section className="flex flex-col gap-3">
@@ -351,13 +458,28 @@ export default function AdminPage() {
           </button>
         </section>
 
-        <button
-          type="submit"
-          disabled={status.type === "submitting"}
-          className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--background)] transition hover:brightness-110 disabled:opacity-50"
-        >
-          {status.type === "submitting" ? "등록 중..." : "콘티 등록"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            disabled={status.type === "submitting"}
+            className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--background)] transition hover:brightness-110 disabled:opacity-50"
+          >
+            {status.type === "submitting"
+              ? "저장 중..."
+              : editingId
+                ? "수정 저장"
+                : "콘티 등록"}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="rounded-full border border-[var(--rule)] px-4 py-2 text-sm text-[var(--parchment-dim)] transition hover:text-[var(--foreground)]"
+            >
+              취소
+            </button>
+          )}
+        </div>
 
         {status.type === "error" && (
           <p className="border border-dashed border-[var(--rule)] p-3 text-sm text-[var(--accent)]">
@@ -366,7 +488,7 @@ export default function AdminPage() {
         )}
         {status.type === "success" && (
           <p className="border border-dashed border-[var(--rule)] p-3 text-sm text-[var(--parchment-dim)]">
-            등록됐습니다. 배포가 끝나면 사이트에 반영됩니다.
+            {status.wasEditing ? "수정" : "등록"}됐습니다. 배포가 끝나면 사이트에 반영됩니다.
           </p>
         )}
       </form>
