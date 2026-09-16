@@ -10,15 +10,31 @@ function emptySong(): SongDraft {
   return { title: "", url: "" };
 }
 
-/** 고른 날짜가 속한 주(일~토)의 일요일 날짜를 YYYY-MM-DD로 반환합니다. */
-function toSunday(dateStr: string): string {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
-  date.setDate(date.getDate() - date.getDay());
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
+function formatDate(d: Date): { value: string; label: string } {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return { value: `${yyyy}-${mm}-${dd}`, label: `${d.getMonth() + 1}월 ${d.getDate()}일` };
+}
+
+/** 오늘이 일요일이면 오늘, 아니면 다가오는 일요일. */
+function nextSunday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  today.setDate(today.getDate() + ((7 - today.getDay()) % 7));
+  return today;
+}
+
+/** 클릭으로 고를 수 있는 일요일 목록 (지난 4주 ~ 앞으로 20주). */
+function sundayOptions(): { value: string; label: string }[] {
+  const base = nextSunday();
+  const options = [];
+  for (let i = -4; i <= 20; i++) {
+    const d = new Date(base);
+    d.setDate(base.getDate() + i * 7);
+    options.push(formatDate(d));
+  }
+  return options;
 }
 
 /** "2026-09-13" -> "9월 13일 예배" */
@@ -30,7 +46,8 @@ function titleFromDate(dateStr: string): string {
 export default function AdminPage() {
   const [adminId, setAdminId] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
-  const [date, setDate] = useState("");
+  const [sundays] = useState(sundayOptions);
+  const [date, setDate] = useState(() => formatDate(nextSunday()).value);
   const [verseReference, setVerseReference] = useState("");
   const [verseText, setVerseText] = useState("");
   const [verseLink, setVerseLink] = useState("");
@@ -52,7 +69,7 @@ export default function AdminPage() {
   }
 
   function resetForm() {
-    setDate("");
+    setDate(formatDate(nextSunday()).value);
     setVerseReference("");
     setVerseText("");
     setVerseLink("");
@@ -126,18 +143,21 @@ export default function AdminPage() {
           </h2>
           <label className="flex flex-col gap-1">
             <span className="text-sm text-[var(--parchment-dim)]">예배 날짜</span>
-            <input
+            <select
               className={inputClass}
-              type="date"
               value={date}
-              onChange={(e) => {
-                if (e.target.value) setDate(toSunday(e.target.value));
-              }}
+              onChange={(e) => setDate(e.target.value)}
               required
-            />
+            >
+              {sundays.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.value} ({s.label} 일요일)
+                </option>
+              ))}
+            </select>
             <span className="text-xs text-[var(--parchment-faint)]">
-              어떤 날짜를 골라도 그 주 일요일로 자동 보정됩니다. 콘티 제목은
-              날짜에서 자동으로 만들어집니다{date ? ` (예: ${titleFromDate(date)})` : ""}.
+              예배가 있는 일요일만 고를 수 있습니다. 콘티 제목은 날짜에서
+              자동으로 만들어집니다 (예: {titleFromDate(date)}).
             </span>
           </label>
         </section>
