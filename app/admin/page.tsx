@@ -21,10 +21,15 @@ function toSunday(dateStr: string): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+/** "2026-09-13" -> "9월 13일 예배" */
+function titleFromDate(dateStr: string): string {
+  const [, m, d] = dateStr.split("-").map(Number);
+  return `${m}월 ${d}일 예배`;
+}
+
 export default function AdminPage() {
   const [adminId, setAdminId] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
-  const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [verseReference, setVerseReference] = useState("");
   const [verseText, setVerseText] = useState("");
@@ -47,7 +52,6 @@ export default function AdminPage() {
   }
 
   function resetForm() {
-    setTitle("");
     setDate("");
     setVerseReference("");
     setVerseText("");
@@ -61,7 +65,7 @@ export default function AdminPage() {
 
     const setlist: Setlist = {
       id: date,
-      title,
+      title: titleFromDate(date),
       date,
       songs: songs.map((s) => ({ title: s.title.trim(), url: s.url.trim() })),
       ...(verseReference.trim() || verseText.trim()
@@ -120,14 +124,8 @@ export default function AdminPage() {
           <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--parchment-dim)]">
             콘티 정보
           </h2>
-          <input
-            className={inputClass}
-            placeholder="콘티 제목 (예: 9월 셋째주 예배)"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-          <div>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm text-[var(--parchment-dim)]">예배 날짜</span>
             <input
               className={inputClass}
               type="date"
@@ -137,10 +135,11 @@ export default function AdminPage() {
               }}
               required
             />
-            <p className="mt-1 text-xs text-[var(--parchment-faint)]">
-              어떤 날짜를 골라도 그 주 일요일로 자동 보정됩니다.
-            </p>
-          </div>
+            <span className="text-xs text-[var(--parchment-faint)]">
+              어떤 날짜를 골라도 그 주 일요일로 자동 보정됩니다. 콘티 제목은
+              날짜에서 자동으로 만들어집니다{date ? ` (예: ${titleFromDate(date)})` : ""}.
+            </span>
+          </label>
         </section>
 
         <section className="flex flex-col gap-3">
