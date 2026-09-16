@@ -18,15 +18,6 @@ function coverFor(songs: { url: string }[]): string | null {
   return null;
 }
 
-function monthKey(dateStr: string): string {
-  return dateStr.slice(0, 7); // "YYYY-MM"
-}
-
-function monthLabel(dateStr: string): string {
-  const [y, m] = dateStr.split("-");
-  return `${y}년 ${Number(m)}월`;
-}
-
 export default function Home() {
   const [query, setQuery] = useState("");
 
@@ -36,21 +27,44 @@ export default function Home() {
   );
   const recent = sorted.slice(0, 3);
 
-  // 날짜 내림차순으로 이미 정렬돼 있으므로, 등장 순서 그대로 중복만 제거하면 최신순 월 목록이 됨.
-  const monthOptions = useMemo(() => {
+  // 날짜 내림차순으로 이미 정렬돼 있으므로, 등장 순서 그대로 중복만 제거하면 최신순이 됨.
+  const yearOptions = useMemo(() => {
     const seen = new Set<string>();
-    const keys: string[] = [];
+    const years: string[] = [];
     for (const s of sorted) {
-      const key = monthKey(s.date);
-      if (!seen.has(key)) {
-        seen.add(key);
-        keys.push(key);
+      const y = s.date.slice(0, 4);
+      if (!seen.has(y)) {
+        seen.add(y);
+        years.push(y);
       }
     }
-    return keys;
+    return years;
   }, [sorted]);
 
-  const [selectedMonth, setSelectedMonth] = useState(() => monthOptions[0] ?? ALL_MONTHS);
+  function monthsInYear(year: string): string[] {
+    const seen = new Set<string>();
+    const months: string[] = [];
+    for (const s of sorted) {
+      if (s.date.slice(0, 4) !== year) continue;
+      const m = s.date.slice(5, 7);
+      if (!seen.has(m)) {
+        seen.add(m);
+        months.push(m);
+      }
+    }
+    return months;
+  }
+
+  const [selectedYear, setSelectedYear] = useState(() => yearOptions[0] ?? "");
+  const [selectedMonth, setSelectedMonth] = useState(
+    () => monthsInYear(yearOptions[0] ?? "")[0] ?? ALL_MONTHS,
+  );
+  const currentYearMonths = monthsInYear(selectedYear);
+
+  function changeYear(year: string) {
+    setSelectedYear(year);
+    setSelectedMonth(monthsInYear(year)[0] ?? ALL_MONTHS);
+  }
 
   const q = query.trim().toLowerCase();
   const filtered = sorted.filter(
@@ -59,10 +73,13 @@ export default function Home() {
       s.title.toLowerCase().includes(q) ||
       s.songs.some((song) => song.title.toLowerCase().includes(q)),
   );
-  // 검색 중일 땐 월 상관없이 전체에서 찾고, 검색이 없을 땐 고른 달만 보여줌.
+  // 검색 중일 땐 년/월 상관없이 전체에서 찾고, 검색이 없을 땐 고른 년/월만 보여줌.
   const displayed = q
     ? filtered
-    : filtered.filter((s) => selectedMonth === ALL_MONTHS || monthKey(s.date) === selectedMonth);
+    : filtered.filter((s) => {
+        if (s.date.slice(0, 4) !== selectedYear) return false;
+        return selectedMonth === ALL_MONTHS || s.date.slice(5, 7) === selectedMonth;
+      });
 
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
@@ -173,18 +190,31 @@ export default function Home() {
                 전체 콘티 리스트
               </h2>
               {!q && (
-                <select
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="border-b border-[var(--rule)] bg-transparent py-1 text-xs text-[var(--parchment-dim)] outline-none focus:border-[var(--accent)]"
-                >
-                  {monthOptions.map((key) => (
-                    <option key={key} value={key}>
-                      {monthLabel(`${key}-01`)}
-                    </option>
-                  ))}
-                  <option value={ALL_MONTHS}>전체 보기</option>
-                </select>
+                <div className="flex gap-1.5">
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => changeYear(e.target.value)}
+                    className="border-b border-[var(--rule)] bg-transparent py-1 text-xs text-[var(--parchment-dim)] outline-none focus:border-[var(--accent)]"
+                  >
+                    {yearOptions.map((y) => (
+                      <option key={y} value={y}>
+                        {y}년
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="border-b border-[var(--rule)] bg-transparent py-1 text-xs text-[var(--parchment-dim)] outline-none focus:border-[var(--accent)]"
+                  >
+                    {currentYearMonths.map((m) => (
+                      <option key={m} value={m}>
+                        {Number(m)}월
+                      </option>
+                    ))}
+                    <option value={ALL_MONTHS}>전체</option>
+                  </select>
+                </div>
               )}
             </div>
             {displayed.length === 0 ? (
