@@ -1,3 +1,5 @@
+import raw from "./setlists.json";
+
 export type Song = {
   /** 곡 제목 */
   title: string;
@@ -27,31 +29,7 @@ export type Setlist = {
   songs: Song[];
 };
 
-// 새 콘티를 추가하려면 이 배열에 객체를 하나 더 넣고 git push 하면 됩니다.
+// 콘티 데이터는 data/setlists.json에 있습니다. 이 배열에 직접 객체를 추가해서
+// git push 하거나, 사이트의 숨은 관리자 화면(/admin)에서 등록해도 됩니다.
 // 자세한 방법은 README.md 참고.
-export const setlists: Setlist[] = [
-  {
-    id: "2026-09-13",
-    title: "9월 13일 예배",
-    date: "2026-09-13",
-    verse: {
-      reference: "시편 51:10",
-      text: "하나님이여 내 속에 정한 마음을 창조하시고\n내 안에 정직한 영을 새롭게 하소서",
-      link: "https://www.bskorea.or.kr/bible/korbibReadpage.php?version=GAE&txtReadInfo=%EC%8B%9C%2051:10&rdoReadType=2&cVersion=&fontSize=15px",
-    },
-    songs: [
-      {
-        title: "말씀이 내 능력되어",
-        url: "https://www.youtube.com/watch?v=MkDMVdFlTCQ&list=RDMkDMVdFlTCQ&start_radio=1",
-      },
-      {
-        title: "성령이여 내 영혼을 / 불을 내려주소서",
-        url: "https://youtu.be/oLZ_c4PHS6w?si=4cvjD2p1MZoND00b",
-      },
-      {
-        title: "영광에서 영광으로",
-        url: "https://youtu.be/q_h5fZP_JzU?si=5yk10UlYmasz6q1G",
-      },
-    ],
-  },
-];
+export const setlists: Setlist[] = raw as Setlist[];
