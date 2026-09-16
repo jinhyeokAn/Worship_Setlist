@@ -1,8 +1,15 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { listSetlists, submitSetlist, updateSetlist, verifyAdmin } from "./actions";
+import {
+  listSetlists,
+  searchYoutube,
+  submitSetlist,
+  updateSetlist,
+  verifyAdmin,
+  type YoutubeSuggestion,
+} from "./actions";
 import type { Setlist } from "@/data/setlists";
 import { getAdminAuth, setAdminAuth } from "@/lib/adminAuth";
 
@@ -86,6 +93,11 @@ function AdminPageInner() {
   const [verseLink, setVerseLink] = useState("");
   const [songs, setSongs] = useState<SongDraft[]>([emptySong()]);
   const [bulkText, setBulkText] = useState("");
+  const [suggestions, setSuggestions] = useState<Record<number, YoutubeSuggestion[]>>({});
+  const [suggestLoading, setSuggestLoading] = useState<number | null>(null);
+  const [suggestError, setSuggestError] = useState<string | null>(null);
+  const [activeSuggestionRow, setActiveSuggestionRow] = useState<number | null>(null);
+  const suggestDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [status, setStatus] = useState<
     | { type: "idle" }
     | { type: "submitting" }
@@ -94,6 +106,16 @@ function AdminPageInner() {
   >({ type: "idle" });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editLoadError, setEditLoadError] = useState<string | null>(null);
+
+  function startEdit(setlist: Setlist) {
+    setEditingId(setlist.id);
+    setServiceDate(parseDateParts(setlist.date));
+    setVerseReference(setlist.verse?.reference ?? "");
+    setVerseText(setlist.verse?.text ?? "");
+    setVerseLink(setlist.verse?.link ?? "");
+    setSongs(setlist.songs.map((s) => ({ title: s.title, url: s.url })));
+    setStatus({ type: "idle" });
+  }
 
   // 저장된 관리자 인증(=관리자 모드)이 있으면 자동으로 로그인 상태로 시작합니다.
   useEffect(() => {
@@ -163,16 +185,6 @@ function AdminPageInner() {
     }
   }
 
-  function startEdit(setlist: Setlist) {
-    setEditingId(setlist.id);
-    setServiceDate(parseDateParts(setlist.date));
-    setVerseReference(setlist.verse?.reference ?? "");
-    setVerseText(setlist.verse?.text ?? "");
-    setVerseLink(setlist.verse?.link ?? "");
-    setSongs(setlist.songs.map((s) => ({ title: s.title, url: s.url })));
-    setStatus({ type: "idle" });
-  }
-
   function cancelEdit() {
     router.push("/admin");
     resetForm();
@@ -188,6 +200,34 @@ function AdminPageInner() {
 
   function removeSong(i: number) {
     setSongs((prev) => (prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev));
+  }
+
+  function handleTitleChange(i: number, value: string) {
+    updateSong(i, { title: value });
+    setActiveSuggestionRow(i);
+    setSuggestError(null);
+
+    if (suggestDebounceRef.current) clearTimeout(suggestDebounceRef.current);
+    if (value.trim().length < 2) {
+      setSuggestions((prev) => ({ ...prev, [i]: [] }));
+      return;
+    }
+    suggestDebounceRef.current = setTimeout(async () => {
+      setSuggestLoading(i);
+      const result = await searchYoutube(adminId, adminPassword, value);
+      setSuggestLoading((current) => (current === i ? null : current));
+      if (result.ok) {
+        setSuggestions((prev) => ({ ...prev, [i]: result.results }));
+      } else {
+        setSuggestError(result.error);
+      }
+    }, 400);
+  }
+
+  function selectSuggestion(i: number, suggestion: YoutubeSuggestion) {
+    updateSong(i, { title: suggestion.title, url: suggestion.url });
+    setSuggestions((prev) => ({ ...prev, [i]: [] }));
+    setActiveSuggestionRow(null);
   }
 
   function applyBulkSongs() {
@@ -415,16 +455,52 @@ function AdminPageInner() {
           </div>
 
           {songs.map((song, i) => (
-            <div key={i} className="flex items-center gap-2">
+            <div key={i} className="flex items-start gap-2">
+              <div className="relative flex-1">
+                <input
+                  className={inputClass}
+                  placeholder={`${i + 1}번째 곡 제목 (입력하면 유튜브 검색)`}
+                  value={song.title}
+                  onChange={(e) => handleTitleChange(i, e.target.value)}
+                  onFocus={() => setActiveSuggestionRow(i)}
+                  onBlur={() => setActiveSuggestionRow(null)}
+                  required
+                />
+                {activeSuggestionRow === i &&
+                  (suggestLoading === i || (suggestions[i]?.length ?? 0) > 0 || suggestError) && (
+                    <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-72 overflow-y-auto border border-[var(--rule)] bg-[var(--ink-soft)]">
+                      {suggestLoading === i ? (
+                        <p className="p-2 text-xs text-[var(--parchment-faint)]">검색 중...</p>
+                      ) : suggestError ? (
+                        <p className="p-2 text-xs text-[var(--accent)]">{suggestError}</p>
+                      ) : (
+                        suggestions[i]?.map((sug) => (
+                          <button
+                            key={sug.videoId}
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              selectSuggestion(i, sug);
+                            }}
+                            className="flex w-full items-center gap-2 p-2 text-left transition hover:bg-[var(--accent)]/10"
+                          >
+                            {sug.thumbnail && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={sug.thumbnail}
+                                alt=""
+                                className="h-8 w-12 shrink-0 object-cover"
+                              />
+                            )}
+                            <span className="truncate text-xs">{sug.title}</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+              </div>
               <input
-                className={inputClass}
-                placeholder={`${i + 1}번째 곡 제목`}
-                value={song.title}
-                onChange={(e) => updateSong(i, { title: e.target.value })}
-                required
-              />
-              <input
-                className={inputClass}
+                className={`${inputClass} flex-1`}
                 placeholder="유튜브 링크"
                 value={song.url}
                 onChange={(e) => updateSong(i, { url: e.target.value })}

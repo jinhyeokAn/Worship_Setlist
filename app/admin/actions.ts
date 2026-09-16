@@ -32,6 +32,16 @@ export type ListSetlistsResult =
   | { ok: true; setlists: Setlist[] }
   | { ok: false; error: string };
 
+export type YoutubeSuggestion = {
+  videoId: string;
+  title: string;
+  url: string;
+  thumbnail: string;
+};
+export type SearchYoutubeResult =
+  | { ok: true; results: YoutubeSuggestion[] }
+  | { ok: false; error: string };
+
 function checkCredentials(adminId: string, adminPassword: string): string | null {
   const expectedId = process.env.ADMIN_ID;
   const expectedPassword = process.env.ADMIN_PASSWORD;
@@ -104,6 +114,53 @@ async function commitSetlists(
     return { ok: false, error: `GitHub 저장에 실패했습니다 (${putRes.status}): ${body}` };
   }
   return { ok: true };
+}
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+type YoutubeSearchApiResponse = {
+  items?: {
+    id: { videoId: string };
+    snippet: { title: string; thumbnails?: { default?: { url: string } } };
+  }[];
+};
+
+export async function searchYoutube(
+  adminId: string,
+  adminPassword: string,
+  query: string,
+): Promise<SearchYoutubeResult> {
+  const credError = checkCredentials(adminId, adminPassword);
+  if (credError) return { ok: false, error: credError };
+
+  if (!query.trim()) return { ok: true, results: [] };
+
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (!apiKey) {
+    return { ok: false, error: "YOUTUBE_API_KEY 환경변수가 설정되지 않았습니다." };
+  }
+
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=${encodeURIComponent(query)}&key=${apiKey}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    const body = await res.text();
+    return { ok: false, error: `유튜브 검색에 실패했습니다 (${res.status}): ${body.slice(0, 200)}` };
+  }
+  const data = (await res.json()) as YoutubeSearchApiResponse;
+  const results: YoutubeSuggestion[] = (data.items ?? []).map((item) => ({
+    videoId: item.id.videoId,
+    title: decodeHtmlEntities(item.snippet.title),
+    url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+    thumbnail: item.snippet.thumbnails?.default?.url ?? "",
+  }));
+  return { ok: true, results };
 }
 
 export async function verifyAdmin(
