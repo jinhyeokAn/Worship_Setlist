@@ -10,6 +10,23 @@ function emptySong(): SongDraft {
   return { title: "", url: "" };
 }
 
+/** 한 줄에 "제목,링크" (쉼표 또는 탭 구분) 형식의 여러 줄을 곡 목록으로 파싱합니다. */
+function parseBulkSongs(text: string): SongDraft[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => {
+      const sepIndex = line.search(/[,\t]/);
+      if (sepIndex === -1) return null;
+      const title = line.slice(0, sepIndex).trim();
+      const url = line.slice(sepIndex + 1).trim();
+      if (!title || !url) return null;
+      return { title, url };
+    })
+    .filter((s): s is SongDraft => s !== null);
+}
+
 function pad(n: number): string {
   return String(n).padStart(2, "0");
 }
@@ -48,6 +65,7 @@ export default function AdminPage() {
   const [verseText, setVerseText] = useState("");
   const [verseLink, setVerseLink] = useState("");
   const [songs, setSongs] = useState<SongDraft[]>([emptySong()]);
+  const [bulkText, setBulkText] = useState("");
   const [status, setStatus] = useState<
     { type: "idle" } | { type: "submitting" } | { type: "error"; message: string } | { type: "success" }
   >({ type: "idle" });
@@ -96,12 +114,23 @@ export default function AdminPage() {
     setSongs((prev) => (prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev));
   }
 
+  function applyBulkSongs() {
+    const parsed = parseBulkSongs(bulkText);
+    if (parsed.length === 0) return;
+    setSongs((prev) => {
+      const meaningful = prev.filter((s) => s.title.trim() || s.url.trim());
+      return [...meaningful, ...parsed];
+    });
+    setBulkText("");
+  }
+
   function resetForm() {
     setServiceDate(defaultServiceDate());
     setVerseReference("");
     setVerseText("");
     setVerseLink("");
     setSongs([emptySong()]);
+    setBulkText("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -262,6 +291,31 @@ export default function AdminPage() {
           <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--parchment-dim)]">
             곡 목록
           </h2>
+
+          <div className="border border-dashed border-[var(--rule)] p-3">
+            <p className="text-xs text-[var(--parchment-dim)]">
+              여러 곡 한 번에 추가하기 — 한 줄에 한 곡씩, &quot;제목,링크&quot;
+              형식으로 붙여넣으세요 (엑셀/스프레드시트에서 복사해도 됨).
+            </p>
+            <textarea
+              className={`${inputClass} mt-2 resize-none font-mono text-xs`}
+              rows={4}
+              placeholder={"은혜,https://youtu.be/xxxxxxxxxxx\n주 은혜임을,https://www.youtube.com/watch?v=xxxxxxxxxxx"}
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={applyBulkSongs}
+              disabled={parseBulkSongs(bulkText).length === 0}
+              className="mt-2 border border-[var(--accent-soft)] px-3 py-1 text-xs text-[var(--accent)] transition hover:bg-[var(--accent)]/10 disabled:opacity-40"
+            >
+              {parseBulkSongs(bulkText).length > 0
+                ? `${parseBulkSongs(bulkText).length}곡 목록에 추가`
+                : "곡 목록에 추가"}
+            </button>
+          </div>
+
           {songs.map((song, i) => (
             <div key={i} className="flex items-center gap-2">
               <input
