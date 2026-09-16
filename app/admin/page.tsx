@@ -10,6 +10,17 @@ function emptySong(): SongDraft {
   return { title: "", url: "" };
 }
 
+/** 고른 날짜가 속한 주(일~토)의 일요일 날짜를 YYYY-MM-DD로 반환합니다. */
+function toSunday(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  date.setDate(date.getDate() - date.getDay());
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 export default function AdminPage() {
   const [adminId, setAdminId] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -116,13 +127,20 @@ export default function AdminPage() {
             onChange={(e) => setTitle(e.target.value)}
             required
           />
-          <input
-            className={inputClass}
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
+          <div>
+            <input
+              className={inputClass}
+              type="date"
+              value={date}
+              onChange={(e) => {
+                if (e.target.value) setDate(toSunday(e.target.value));
+              }}
+              required
+            />
+            <p className="mt-1 text-xs text-[var(--parchment-faint)]">
+              어떤 날짜를 골라도 그 주 일요일로 자동 보정됩니다.
+            </p>
+          </div>
         </section>
 
         <section className="flex flex-col gap-3">
