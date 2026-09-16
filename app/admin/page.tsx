@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { submitSetlist } from "./actions";
+import { submitSetlist, verifyAdmin } from "./actions";
 import type { Setlist } from "@/data/setlists";
 
 type SongDraft = { title: string; url: string };
@@ -39,6 +39,10 @@ function titleFromParts(month: number, day: number): string {
 export default function AdminPage() {
   const [adminId, setAdminId] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [loginStatus, setLoginStatus] = useState<
+    { type: "idle" } | { type: "checking" } | { type: "error"; message: string }
+  >({ type: "idle" });
   const [{ year, month, day }, setServiceDate] = useState(defaultServiceDate);
   const [verseReference, setVerseReference] = useState("");
   const [verseText, setVerseText] = useState("");
@@ -66,6 +70,18 @@ export default function AdminPage() {
 
   function changeDay(newDay: number) {
     setServiceDate({ year, month, day: newDay });
+  }
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoginStatus({ type: "checking" });
+    const result = await verifyAdmin(adminId, adminPassword);
+    if (result.ok) {
+      setIsAuthed(true);
+      setLoginStatus({ type: "idle" });
+    } else {
+      setLoginStatus({ type: "error", message: result.error });
+    }
   }
 
   function updateSong(i: number, patch: Partial<SongDraft>) {
@@ -120,18 +136,15 @@ export default function AdminPage() {
   const inputClass =
     "w-full border-b border-[var(--rule)] bg-transparent py-2 text-sm outline-none placeholder:text-[var(--parchment-faint)] focus:border-[var(--accent)]";
 
-  return (
-    <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <h1 className="font-display text-2xl font-bold tracking-tight">관리자 · 콘티 등록</h1>
-      <p className="mt-1 text-sm text-[var(--parchment-dim)]">
-        등록하면 GitHub에 바로 커밋되고, 잠시 후 사이트에 반영됩니다.
-      </p>
+  if (!isAuthed) {
+    return (
+      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
+        <h1 className="font-display text-2xl font-bold tracking-tight">관리자 로그인</h1>
+        <p className="mt-1 text-sm text-[var(--parchment-dim)]">
+          콘티를 등록하려면 먼저 로그인하세요.
+        </p>
 
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-6">
-        <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--accent)]">
-            관리자 확인
-          </h2>
+        <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-4">
           <input
             className={inputClass}
             placeholder="아이디"
@@ -147,8 +160,31 @@ export default function AdminPage() {
             onChange={(e) => setAdminPassword(e.target.value)}
             required
           />
-        </section>
+          <button
+            type="submit"
+            disabled={loginStatus.type === "checking"}
+            className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--background)] transition hover:brightness-110 disabled:opacity-50"
+          >
+            {loginStatus.type === "checking" ? "확인 중..." : "로그인"}
+          </button>
+          {loginStatus.type === "error" && (
+            <p className="border border-dashed border-[var(--rule)] p-3 text-sm text-[var(--accent)]">
+              {loginStatus.message}
+            </p>
+          )}
+        </form>
+      </div>
+    );
+  }
 
+  return (
+    <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
+      <h1 className="font-display text-2xl font-bold tracking-tight">관리자 · 콘티 등록</h1>
+      <p className="mt-1 text-sm text-[var(--parchment-dim)]">
+        등록하면 GitHub에 바로 커밋되고, 잠시 후 사이트에 반영됩니다.
+      </p>
+
+      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-6">
         <section className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--parchment-dim)]">
             콘티 정보

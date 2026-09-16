@@ -16,6 +16,27 @@ export type SubmitSetlistInput = {
 
 export type SubmitSetlistResult = { ok: true } | { ok: false; error: string };
 
+export async function verifyAdmin(
+  adminId: string,
+  adminPassword: string,
+): Promise<SubmitSetlistResult> {
+  const expectedId = process.env.ADMIN_ID;
+  const expectedPassword = process.env.ADMIN_PASSWORD;
+  const token = process.env.GITHUB_TOKEN;
+
+  if (!expectedId || !expectedPassword || !token) {
+    return {
+      ok: false,
+      error:
+        "관리자 기능이 아직 설정되지 않았습니다 (ADMIN_ID / ADMIN_PASSWORD / GITHUB_TOKEN 환경변수 필요).",
+    };
+  }
+  if (adminId !== expectedId || adminPassword !== expectedPassword) {
+    return { ok: false, error: "아이디 또는 비밀번호가 올바르지 않습니다." };
+  }
+  return { ok: true };
+}
+
 function validateSetlist(setlist: Setlist): string | null {
   if (!setlist.title.trim()) return "콘티 제목을 입력하세요.";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(setlist.date)) return "날짜 형식이 올바르지 않습니다.";
