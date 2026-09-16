@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { setlists } from "@/data/setlists";
 import SetlistPlayer from "@/components/SetlistPlayer";
+import AdminSetlistControls from "@/components/AdminSetlistControls";
 
 export default async function SetlistPage({
   params,
@@ -26,6 +27,7 @@ export default async function SetlistPage({
       <p className="text-sm text-[var(--parchment-dim)]">
         {setlist.date} · {setlist.songs.length}곡
       </p>
+      <AdminSetlistControls id={setlist.id} title={setlist.title} />
 
       {setlist.verse && (
         <blockquote className="mt-4 border-l border-[var(--accent-soft)] bg-[var(--accent)]/5 p-4 pl-6">

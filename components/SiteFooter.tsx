@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { clearAdminAuth, getAdminAuth } from "@/lib/adminAuth";
 
 const TAPS_REQUIRED = 5;
 const TAP_WINDOW_MS = 3000;
@@ -10,6 +11,12 @@ export default function SiteFooter() {
   const router = useRouter();
   const tapCountRef = useRef(0);
   const lastTapRef = useRef(0);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from localStorage, a client-only external system
+    setIsAdmin(!!getAdminAuth());
+  }, []);
 
   function handleTap() {
     const now = Date.now();
@@ -25,6 +32,11 @@ export default function SiteFooter() {
     }
   }
 
+  function turnOffAdminMode() {
+    clearAdminAuth();
+    window.location.reload();
+  }
+
   return (
     <footer className="mx-auto w-full max-w-2xl border-t border-[var(--rule)] px-4 pb-10 pt-6 text-right">
       <button
@@ -34,6 +46,17 @@ export default function SiteFooter() {
       >
         Soli Deo Gloria
       </button>
+      {isAdmin && (
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={turnOffAdminMode}
+            className="text-xs text-[var(--parchment-faint)] underline hover:text-[var(--foreground)]"
+          >
+            관리자 모드 끄기
+          </button>
+        </div>
+      )}
     </footer>
   );
 }

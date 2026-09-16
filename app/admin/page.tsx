@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { deleteSetlist, listSetlists, submitSetlist, updateSetlist, verifyAdmin } from "./actions";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { listSetlists, submitSetlist, updateSetlist, verifyAdmin } from "./actions";
 import type { Setlist } from "@/data/setlists";
+import { getAdminAuth, setAdminAuth } from "@/lib/adminAuth";
 
 type SongDraft = { title: string; url: string };
 
@@ -59,9 +61,22 @@ function parseDateParts(dateStr: string): { year: number; month: number; day: nu
 }
 
 export default function AdminPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminPageInner />
+    </Suspense>
+  );
+}
+
+function AdminPageInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editParam = searchParams.get("edit");
+
   const [adminId, setAdminId] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
+  const [checkingStoredAuth, setCheckingStoredAuth] = useState(true);
   const [loginStatus, setLoginStatus] = useState<
     { type: "idle" } | { type: "checking" } | { type: "error"; message: string }
   >({ type: "idle" });
@@ -78,8 +93,42 @@ export default function AdminPage() {
     | { type: "success"; wasEditing: boolean }
   >({ type: "idle" });
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [existingSetlists, setExistingSetlists] = useState<Setlist[] | null>(null);
-  const [listError, setListError] = useState<string | null>(null);
+  const [editLoadError, setEditLoadError] = useState<string | null>(null);
+
+  // 저장된 관리자 인증(=관리자 모드)이 있으면 자동으로 로그인 상태로 시작합니다.
+  useEffect(() => {
+    const stored = getAdminAuth();
+    if (!stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from localStorage, a client-only external system
+      setCheckingStoredAuth(false);
+      return;
+    }
+    setAdminId(stored.id);
+    setAdminPassword(stored.password);
+    verifyAdmin(stored.id, stored.password).then((result) => {
+      if (result.ok) setIsAuthed(true);
+      setCheckingStoredAuth(false);
+    });
+  }, []);
+
+  // ?edit=<id>로 들어온 경우, 로그인 상태가 되면 해당 콘티를 불러와 폼에 채웁니다.
+  useEffect(() => {
+    if (!isAuthed || !editParam || !adminId || !adminPassword) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing stale error before a fresh fetch from GitHub
+    setEditLoadError(null);
+    listSetlists(adminId, adminPassword).then((result) => {
+      if (!result.ok) {
+        setEditLoadError(result.error);
+        return;
+      }
+      const found = result.setlists.find((s) => s.id === editParam);
+      if (found) {
+        startEdit(found);
+      } else {
+        setEditLoadError("수정하려는 콘티를 찾을 수 없습니다.");
+      }
+    });
+  }, [isAuthed, editParam, adminId, adminPassword]);
 
   const date = `${year}-${pad(month)}-${pad(day)}`;
   const currentYear = new Date().getFullYear();
@@ -106,21 +155,11 @@ export default function AdminPage() {
     setLoginStatus({ type: "checking" });
     const result = await verifyAdmin(adminId, adminPassword);
     if (result.ok) {
+      setAdminAuth({ id: adminId, password: adminPassword });
       setIsAuthed(true);
       setLoginStatus({ type: "idle" });
-      refreshList();
     } else {
       setLoginStatus({ type: "error", message: result.error });
-    }
-  }
-
-  async function refreshList() {
-    const result = await listSetlists(adminId, adminPassword);
-    if (result.ok) {
-      setExistingSetlists([...result.setlists].sort((a, b) => b.date.localeCompare(a.date)));
-      setListError(null);
-    } else {
-      setListError(result.error);
     }
   }
 
@@ -132,23 +171,11 @@ export default function AdminPage() {
     setVerseLink(setlist.verse?.link ?? "");
     setSongs(setlist.songs.map((s) => ({ title: s.title, url: s.url })));
     setStatus({ type: "idle" });
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function cancelEdit() {
-    setEditingId(null);
+    router.push("/admin");
     resetForm();
-  }
-
-  async function handleDelete(setlist: Setlist) {
-    if (!window.confirm(`"${setlist.title}"을(를) 삭제할까요? 되돌릴 수 없습니다.`)) return;
-    const result = await deleteSetlist({ adminId, adminPassword, id: setlist.id });
-    if (result.ok) {
-      if (editingId === setlist.id) cancelEdit();
-      refreshList();
-    } else {
-      setListError(result.error);
-    }
   }
 
   function updateSong(i: number, patch: Partial<SongDraft>) {
@@ -210,8 +237,11 @@ export default function AdminPage() {
 
     if (result.ok) {
       setStatus({ type: "success", wasEditing });
-      resetForm();
-      refreshList();
+      if (wasEditing) {
+        router.push(`/setlist/${setlist.id}`);
+      } else {
+        resetForm();
+      }
     } else {
       setStatus({ type: "error", message: result.error });
     }
@@ -220,12 +250,17 @@ export default function AdminPage() {
   const inputClass =
     "w-full border-b border-[var(--rule)] bg-transparent py-2 text-sm outline-none placeholder:text-[var(--parchment-faint)] focus:border-[var(--accent)]";
 
+  if (checkingStoredAuth) {
+    return <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8" />;
+  }
+
   if (!isAuthed) {
     return (
       <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
         <h1 className="font-display text-2xl font-bold tracking-tight">관리자 로그인</h1>
         <p className="mt-1 text-sm text-[var(--parchment-dim)]">
-          콘티를 등록하려면 먼저 로그인하세요.
+          콘티를 등록하려면 먼저 로그인하세요. 로그인하면 관리자 모드가 켜지고,
+          이 브라우저에서 계속 유지됩니다 (끄려면 페이지 맨 아래 링크 사용).
         </p>
 
         <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-4">
@@ -267,58 +302,14 @@ export default function AdminPage() {
         관리자 · 콘티 {editingId ? "수정" : "등록"}
       </h1>
       <p className="mt-1 text-sm text-[var(--parchment-dim)]">
-        등록/수정/삭제하면 GitHub에 바로 커밋되고, 잠시 후 사이트에 반영됩니다.
+        등록/수정하면 GitHub에 바로 커밋되고, 잠시 후 사이트에 반영됩니다. 기존
+        콘티 수정·삭제는 그 콘티 페이지에서 할 수 있습니다.
       </p>
-
-      <section className="mt-6 flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--parchment-dim)]">
-            등록된 콘티
-          </h2>
-          <button
-            type="button"
-            onClick={refreshList}
-            className="text-xs text-[var(--parchment-faint)] hover:text-[var(--foreground)]"
-          >
-            새로고침
-          </button>
-        </div>
-        {listError && (
-          <p className="border border-dashed border-[var(--rule)] p-3 text-sm text-[var(--accent)]">
-            {listError}
-          </p>
-        )}
-        {existingSetlists === null && !listError && (
-          <p className="text-sm text-[var(--parchment-faint)]">불러오는 중...</p>
-        )}
-        {existingSetlists?.length === 0 && (
-          <p className="text-sm text-[var(--parchment-faint)]">등록된 콘티가 없습니다.</p>
-        )}
-        {existingSetlists?.map((s) => (
-          <div
-            key={s.id}
-            className="flex items-center gap-3 border-b border-[var(--rule)] py-2"
-          >
-            <span className="min-w-0 flex-1 truncate text-sm">
-              {s.title} <span className="text-[var(--parchment-faint)]">· {s.date}</span>
-            </span>
-            <button
-              type="button"
-              onClick={() => startEdit(s)}
-              className="shrink-0 border border-[var(--accent-soft)] px-2 py-1 text-xs text-[var(--accent)] transition hover:bg-[var(--accent)]/10"
-            >
-              수정
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDelete(s)}
-              className="shrink-0 px-2 py-1 text-xs text-[var(--parchment-faint)] hover:text-[var(--accent)]"
-            >
-              삭제
-            </button>
-          </div>
-        ))}
-      </section>
+      {editLoadError && (
+        <p className="mt-3 border border-dashed border-[var(--rule)] p-3 text-sm text-[var(--accent)]">
+          {editLoadError}
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-6">
         <section className="flex flex-col gap-3">
