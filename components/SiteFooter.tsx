@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { clearAdminAuth, getAdminAuth } from "@/lib/adminAuth";
 
-const TAPS_REQUIRED = 5;
+const TAPS_REQUIRED = 3;
 const TAP_WINDOW_MS = 3000;
 
 export default function SiteFooter() {

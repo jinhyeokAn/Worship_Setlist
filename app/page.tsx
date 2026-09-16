@@ -16,6 +16,30 @@ function coverFor(songs: { url: string }[]): string | null {
   return null;
 }
 
+function monthKey(dateStr: string): string {
+  return dateStr.slice(0, 7); // "YYYY-MM"
+}
+
+function monthLabel(dateStr: string): string {
+  const [y, m] = dateStr.split("-");
+  return `${y}년 ${Number(m)}월`;
+}
+
+/** 날짜 내림차순으로 정렬된 목록을 월별로 묶습니다. */
+function groupByMonth<T extends { date: string }>(items: T[]): { key: string; label: string; items: T[] }[] {
+  const groups: { key: string; label: string; items: T[] }[] = [];
+  for (const item of items) {
+    const key = monthKey(item.date);
+    const last = groups[groups.length - 1];
+    if (last && last.key === key) {
+      last.items.push(item);
+    } else {
+      groups.push({ key, label: monthLabel(item.date), items: [item] });
+    }
+  }
+  return groups;
+}
+
 export default function Home() {
   const [query, setQuery] = useState("");
 
@@ -31,6 +55,7 @@ export default function Home() {
       s.title.toLowerCase().includes(q) ||
       s.songs.some((song) => song.title.toLowerCase().includes(q)),
   );
+  const monthGroups = groupByMonth(filtered);
 
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
@@ -144,55 +169,65 @@ export default function Home() {
                 검색 결과가 없습니다.
               </p>
             ) : (
-              <ol className="flex flex-col gap-1">
-                {filtered.map((s, i) => {
-                  const cover = coverFor(s.songs);
-                  const matchedSong = q
-                    ? s.songs.find((song) => song.title.toLowerCase().includes(q))
-                    : undefined;
-                  const subtitleSong = matchedSong ?? s.songs[0];
-                  return (
-                    <li key={s.id}>
-                      <Link
-                        href={`/setlist/${s.id}`}
-                        style={{ animationDelay: `${i * 55}ms` }}
-                        className="flex items-center gap-3 border-b border-[var(--rule)] p-2 opacity-0 transition [animation:ink-in_0.5s_ease_forwards] hover:bg-[var(--accent)]/5"
-                      >
-                        <span className="font-accent w-7 shrink-0 text-center text-lg italic text-[var(--parchment-faint)]">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        {cover ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={cover}
-                            alt=""
-                            className="h-10 w-10 shrink-0 object-cover [filter:sepia(0.35)_contrast(1.05)_brightness(0.85)]"
-                          />
-                        ) : (
-                          <span className="h-10 w-10 shrink-0 border border-[var(--rule)]" />
-                        )}
-                        <span className="min-w-0 flex-1">
-                          <span className="font-display block truncate text-sm font-bold">
-                            {s.title}
-                          </span>
-                          <span className="block truncate text-xs text-[var(--parchment-dim)]">
-                            {matchedSong && "♪ "}
-                            {subtitleSong?.title}
-                            {s.songs.length > 1 &&
-                              ` 외 ${s.songs.length - 1}곡`}
-                          </span>
-                        </span>
-                        <span className="shrink-0 text-xs text-[var(--parchment-faint)]">
-                          {s.date}
-                        </span>
-                        <span className="shrink-0 border border-[var(--rule)] px-2 py-0.5 text-[11px] text-[var(--parchment-dim)]">
-                          {s.songs.length} Songs
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ol>
+              <div className="flex flex-col gap-5">
+                {monthGroups.map((group) => (
+                  <div key={group.key}>
+                    <h3 className="font-accent mb-1.5 text-xs italic text-[var(--parchment-faint)]">
+                      {group.label}
+                    </h3>
+                    <ol className="flex flex-col gap-1">
+                      {group.items.map((s) => {
+                        const i = filtered.indexOf(s);
+                        const cover = coverFor(s.songs);
+                        const matchedSong = q
+                          ? s.songs.find((song) => song.title.toLowerCase().includes(q))
+                          : undefined;
+                        const subtitleSong = matchedSong ?? s.songs[0];
+                        return (
+                          <li key={s.id}>
+                            <Link
+                              href={`/setlist/${s.id}`}
+                              style={{ animationDelay: `${i * 55}ms` }}
+                              className="flex items-center gap-3 border-b border-[var(--rule)] p-2 opacity-0 transition [animation:ink-in_0.5s_ease_forwards] hover:bg-[var(--accent)]/5"
+                            >
+                              <span className="font-accent w-7 shrink-0 text-center text-lg italic text-[var(--parchment-faint)]">
+                                {String(i + 1).padStart(2, "0")}
+                              </span>
+                              {cover ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={cover}
+                                  alt=""
+                                  className="h-10 w-10 shrink-0 object-cover [filter:sepia(0.35)_contrast(1.05)_brightness(0.85)]"
+                                />
+                              ) : (
+                                <span className="h-10 w-10 shrink-0 border border-[var(--rule)]" />
+                              )}
+                              <span className="min-w-0 flex-1">
+                                <span className="font-display block truncate text-sm font-bold">
+                                  {s.title}
+                                </span>
+                                <span className="block truncate text-xs text-[var(--parchment-dim)]">
+                                  {matchedSong && "♪ "}
+                                  {subtitleSong?.title}
+                                  {s.songs.length > 1 &&
+                                    ` 외 ${s.songs.length - 1}곡`}
+                                </span>
+                              </span>
+                              <span className="shrink-0 text-xs text-[var(--parchment-faint)]">
+                                {s.date}
+                              </span>
+                              <span className="shrink-0 border border-[var(--rule)] px-2 py-0.5 text-[11px] text-[var(--parchment-dim)]">
+                                {s.songs.length} Songs
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </div>
+                ))}
+              </div>
             )}
           </section>
         </>
