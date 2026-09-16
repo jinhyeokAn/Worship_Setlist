@@ -225,7 +225,7 @@ function AdminPageInner() {
   }
 
   function selectSuggestion(i: number, suggestion: YoutubeSuggestion) {
-    updateSong(i, { title: suggestion.title, url: suggestion.url });
+    updateSong(i, { url: suggestion.url });
     setSuggestions((prev) => ({ ...prev, [i]: [] }));
     setActiveSuggestionRow(null);
   }
