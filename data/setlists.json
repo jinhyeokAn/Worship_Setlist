@@ -37,5 +37,32 @@
       "reference": "창세기 1장 1절",
       "text": "태초에 하나님이 천지를 창조"
     }
+  },
+  {
+    "id": "2026-09-27",
+    "title": "9월 27일 예배",
+    "date": "2026-09-27",
+    "songs": [
+      {
+        "title": "지금은 엘리야 때처럼",
+        "url": "https://youtu.be/fhj3SowJkP0?si=rIvcFdpJXtu5q_x6"
+      },
+      {
+        "title": "주와 함께 살아가야 해",
+        "url": "https://www.youtube.com/watch?v=Q6H1JA9rsbs"
+      },
+      {
+        "title": "다시 일어나",
+        "url": "https://www.youtube.com/watch?v=qDyCoSMia48"
+      },
+      {
+        "title": "날 살피시는 주",
+        "url": "https://www.youtube.com/watch?v=G5Dk599BJPY"
+      }
+    ],
+    "verse": {
+      "reference": "롬 1:17",
+      "text": "복음에는 하나님의 의가 나타나서 믿음으로 이르게 하나니\n기록된 바 오직 의인은 믿음으로 말미암아 살리라 함과 같으니라"
+    }
   }
 ]
