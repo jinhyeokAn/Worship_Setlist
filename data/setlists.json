@@ -37,5 +37,32 @@
       "reference": "창세기 1장 1절",
       "text": "태초에 하나님이 천지를 창조"
     }
+  },
+  {
+    "id": "2026-10-04",
+    "title": "10월 4일 예배",
+    "date": "2026-10-04",
+    "verse": {
+      "reference": "마태복음 18:12-13",
+      "text": "너희 생각에는 어떠하냐 만일 어떤 사람이 양 백 마리가 있는데 그 중의 하나가 길을 잃었으면 그 아흔아홉 마리를 산에 두고 가서 길 잃은 양을 찾지 않겠느냐\n진실로 너희에게 이르노니 만일 찾으면 길을 잃지 아니한 아흔아홉 마리보다 이것을 더 기뻐하리라"
+    },
+    "songs": [
+      {
+        "title": "선하신 목자",
+        "url": "https://www.youtube.com/watch?v=2O4geYCjsnw&list=RD2O4geYCjsnw&start_radio=1"
+      },
+      {
+        "title": "실로암",
+        "url": "https://www.youtube.com/watch?v=6ZN09GOiMM4&list=RD6ZN09GOiMM4&start_radio=1"
+      },
+      {
+        "title": "아흔아홉 마리 양",
+        "url": "https://www.youtube.com/watch?v=dlNWvsZ--yc&list=RDdlNWvsZ--yc&start_radio=1"
+      },
+      {
+        "title": "사랑은 여기 있으니",
+        "url": "https://www.youtube.com/watch?v=UhGXZ1SJ2n0&list=RDUhGXZ1SJ2n0&start_radio=1"
+      }
+    ]
   }
 ]
