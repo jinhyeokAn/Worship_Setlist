@@ -76,5 +76,24 @@
         "url": "https://www.youtube.com/watch?v=UhGXZ1SJ2n0&list=RDUhGXZ1SJ2n0&start_radio=1"
       }
     ]
+  },
+  {
+    "id": "2026-10-11",
+    "title": "10월 11일 예배",
+    "date": "2026-10-11",
+    "songs": [
+      {
+        "title": "주님의 마음 있는 곳",
+        "url": "https://www.youtube.com/watch?v=k8qloQzenSo"
+      },
+      {
+        "title": "하나님의 나라",
+        "url": "https://www.youtube.com/watch?v=xtBnkPYqBr0"
+      },
+      {
+        "title": "말씀 앞에서",
+        "url": "https://www.youtube.com/watch?v=EiuUV1HWEGo"
+      }
+    ]
   }
 ]
