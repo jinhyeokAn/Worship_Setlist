@@ -95,5 +95,16 @@
         "url": "https://www.youtube.com/watch?v=EiuUV1HWEGo"
       }
     ]
+  },
+  {
+    "id": "2026-10-18",
+    "title": "10월 18일 예배",
+    "date": "2026-10-18",
+    "songs": [
+      { "title": "다윗의 기도", "url": "https://youtu.be/SS8j6TjR4MY" },
+      { "title": "주를 찾는 모든 자들이", "url": "https://youtu.be/Fi2waeWY18g" },
+      { "title": "감사", "url": "https://youtu.be/WJCk35xzHFM" },
+      { "title": "행복", "url": "https://youtu.be/4nZftmd8roc" }
+    ]
   }
 ]
