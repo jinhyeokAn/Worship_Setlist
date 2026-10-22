@@ -101,11 +101,49 @@
     "title": "10월 18일 예배",
     "date": "2026-10-18",
     "songs": [
-      { "title": "다윗의 기도", "url": "https://youtu.be/SS8j6TjR4MY" },
-      { "title": "주를 찾는 모든 자들이", "url": "https://youtu.be/Fi2waeWY18g" },
-      { "title": "감사", "url": "https://youtu.be/WJCk35xzHFM" },
-      { "title": "행복", "url": "https://youtu.be/4nZftmd8roc" },
-      { "title": "감사함으로", "url": "https://youtu.be/rmFeKxxElcA" }
+      {
+        "title": "다윗의 기도",
+        "url": "https://youtu.be/SS8j6TjR4MY"
+      },
+      {
+        "title": "주를 찾는 모든 자들이",
+        "url": "https://youtu.be/Fi2waeWY18g"
+      },
+      {
+        "title": "감사",
+        "url": "https://youtu.be/WJCk35xzHFM"
+      },
+      {
+        "title": "행복",
+        "url": "https://youtu.be/4nZftmd8roc"
+      },
+      {
+        "title": "감사함으로",
+        "url": "https://youtu.be/rmFeKxxElcA"
+      }
+    ]
+  },
+  {
+    "id": "2026-10-25",
+    "title": "10월 25일 예배",
+    "date": "2026-10-25",
+    "songs": [
+      {
+        "title": "어둔날 다 지나고",
+        "url": "https://www.youtube.com/watch?v=EqDL2-OW1Z4"
+      },
+      {
+        "title": "전쟁은 주의 것",
+        "url": "https://www.youtube.com/watch?v=r5T2z6yX-bg"
+      },
+      {
+        "title": "하나님께서 당신을 통해",
+        "url": "https://www.youtube.com/watch?v=1N7l11auX3E"
+      },
+      {
+        "title": "아무것도 두려워말라",
+        "url": "https://www.youtube.com/watch?v=jTDVBR_pRCI"
+      }
     ]
   }
 ]
