@@ -178,10 +178,41 @@
       "text": "나는 여호와를 향하여 말하기를 그는 나의 피난처요 나의 요새요 내가 의뢰하는 하나님이라 하리니\n이는 그가 너를 새 사냥꾼의 올무에서와 심한 전염병에서 건지실 것임이로다\n그가 너를 그의 깃으로 덮으시리니 네가 그의 날개 아래에 피하리로다 그의 진실함은 방패와 손 방패가 되시나니"
     },
     "songs": [
-      { "title": "약할 때 강함되시네", "url": "https://youtu.be/tAIu_LC9E58" },
-      { "title": "주 이름 찬양", "url": "https://youtu.be/ghqnnYmwUiY" },
-      { "title": "끝없는 사랑/주님은 신실하고", "url": "https://youtu.be/IRxLKV8KzUI" },
-      { "title": "우리 주 하나님", "url": "https://youtu.be/RPbQvQpOO2M" }
+      {
+        "title": "약할 때 강함되시네",
+        "url": "https://youtu.be/tAIu_LC9E58"
+      },
+      {
+        "title": "주 이름 찬양",
+        "url": "https://youtu.be/ghqnnYmwUiY"
+      },
+      {
+        "title": "끝없는 사랑/주님은 신실하고",
+        "url": "https://youtu.be/IRxLKV8KzUI"
+      },
+      {
+        "title": "우리 주 하나님",
+        "url": "https://youtu.be/RPbQvQpOO2M"
+      }
+    ]
+  },
+  {
+    "id": "2026-11-22",
+    "title": "11월 22일 예배",
+    "date": "2026-11-22",
+    "songs": [
+      {
+        "title": "성문 밖으로",
+        "url": "https://www.youtube.com/watch?v=MAG_1H01888"
+      },
+      {
+        "title": "거룩 영원히",
+        "url": "https://www.youtube.com/watch?v=Q2c0WqiotCk"
+      },
+      {
+        "title": "우리 주 하나님",
+        "url": "https://www.youtube.com/watch?v=RPbQvQpOO2M"
+      }
     ]
   }
 ]
